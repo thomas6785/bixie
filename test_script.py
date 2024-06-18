@@ -4,17 +4,17 @@ from tree import *
 myCube = CubeState()
 
 from random import choice
-for i in range(10):
+for i in range(3):
     move = choice(possible_moves)
     print(move)
     myCube.turn( move )
+    print(Node(myCube).get_heuristic())
     # randomise the cube (50 moves is more than enough, 20 is sufficient if there's no redundancy but there could be)
 
 root = Node( myCube )
 print(f"Starting heuristic: {root.get_heuristic()}")
 print()
 
-last_inferred_heuristic = -99 # placeholder
 inferred_heuristics = [-99,-99,-99]
 depth = 3
 while True:
@@ -36,3 +36,6 @@ while True:
     print()
     if root.get_heuristic() == 54: # fully solved cube
         break
+
+print(len(hashes))
+print(len(set(hashes)))
