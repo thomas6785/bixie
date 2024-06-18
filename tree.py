@@ -17,6 +17,8 @@ class Child_Link():
 
         # add hashing to avoid duplicates here TODO
 
+hashes = []
+
 class Node():
     def __init__( self, cubeState ):
         self.cubeState = cubeState
@@ -25,6 +27,9 @@ class Node():
 
         self.children = []
         self.has_children = False
+
+        global hashes
+        hashes.append(cubeState.get_hash())
 
         # okay so hashing to avoid duplicates is fine
         # not moving the same face twice is fine
