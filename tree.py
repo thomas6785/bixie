@@ -44,7 +44,6 @@ class Node():
         self.has_children = True
 
     def analyse( self, depth ):
-        # TODO implement alpha-beta pruning
         if not(self.has_children):
             self.spawn_children()
         
