@@ -10,5 +10,5 @@ Test Rubix cube solver
 
 - Implement A* instead of whatever the fuck you have going right now
     This leads to a problem of having lots of repetitively checking for situations where the same face is moved twice in a row. Fix this one of two ways:
-        - Only allow one clockwise turn at a time (put assign a cost of zero to turning the same face twice)
+        - Only allow one clockwise turn at a time (but assign a cost of zero to turning the same face twice)
         - When a new node is created, automatically add the neighbours it shares with the parent node (the parent itself and five others)
