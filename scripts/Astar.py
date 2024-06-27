@@ -15,12 +15,15 @@ class Node():
         self.heuristic = None
 
         # Used for A*
-        self.came_from = None # Stores the cost of the cheapest path from start to n currently known
+        self.came_from = None # Stores the best node to get here from
+        self.came_from_move = None # Stores the last move for the best path to this node
+        self.move_stack = [] # debugging purposes (for now?)
         self.gscore = None # Stores the cost of the cheapest path from start to n currently known (default infinity)
         self.fscore = None # Estimate of the path length from start to finish through this node - equal to gscore + heuristic (default infinity)
     
     def get_neighbours( self, known_close={} ):
-        if self.neighbours_spawneD:
+        print("Extrapolating "+str(self.move_stack))
+        if self.neighbours_spawned:
             return self.neighbours
         # known_close lets you pass in a hashtable of nodes known to be nearby to search before searching the main hashtable
         self.neighbours_spawned = True
@@ -29,13 +32,13 @@ class Node():
             newCubeState = copy( self.cubeState )
             newCubeState.turn( move )
             if newCubeState.get_hash() in known_close:
-                self.neighbours.append( known_close[newCubeState.get_hash()] )
+                self.neighbours.append(( move, known_close[newCubeState.get_hash()] ))
             elif newCubeState.get_hash() in known_hashes:
-                self.neighbours.append( known_hashes[newCubeState.get_hash()] )
+                self.neighbours.append(( move, known_hashes[newCubeState.get_hash()] ))
             else:
                 new_neighbour = Node( newCubeState )
                 known_hashes[ newCubeState.get_hash() ] = new_neighbour
-                self.neighbours.append( new_neighbour )
+                self.neighbours.append(( move, new_neighbour ))
         
         return self.neighbours
 
@@ -44,20 +47,20 @@ class Node():
             return self.heuristic
         
         # Simple heuristic: just add up how many PIECES are in the correct POSITION and the correct ORIENTATION
-        self.heuristic = 0
+        self.heuristic = 54
         pieces = self.cubeState.pieces
         for z in range(3):
             for y in range(3):
                 for x in range(3):
                     if pieces[x][y][z].colours == (x,y,z):
-                        self.heuristic += 1
+                        self.heuristic -= 1
                         if pieces[x][y][z].orientation == [0,0,1]:
-                            self.heuristic += 1
+                            self.heuristic -= 1
         
         return self.heuristic
     
     def is_solved( self ):
-        return self.get_heuristic() == 54 # todo remember to update this is the heuristic changes
+        return self.get_heuristic() == 0 # todo remember to update this if the heuristic changes
 
 def reconstruct_path( end_node ):
     total_path = [ end_node ]
@@ -66,14 +69,16 @@ def reconstruct_path( end_node ):
     while True:
         if current_node.came_from:
             total_path.insert(0,current_node.came_from)
+            moves.insert(0,current_node.came_from_move)
             current_node = current_node.came_from
         else:
-            return total_path
+            return moves,total_path
     # TODO modify this to return a series of MOVES rather than nodes
 
 
-def A_star( startNode, heuristic ):
+def A_star( startNode ):
     frontier_nodes = [ startNode ]
+    known_hashes[startNode.cubeState.get_hash()] = startNode
 
     startNode.gscore = 0 # by definition
     startNode.fscore = startNode.get_heuristic()
@@ -81,14 +86,15 @@ def A_star( startNode, heuristic ):
     while len(frontier_nodes) > 0:
         frontier_nodes = sorted(frontier_nodes, key=attrgetter('fscore'))
         current_node = frontier_nodes.pop(0)
-        if current_node.is_solved()
+        if current_node.is_solved():
             return reconstruct_path( current_node )
         
-        current_node.get_children()
-        for neighbour in current_node.get_neighbours():
+        for move,neighbour in current_node.get_neighbours():
             tentative_gscore = current_node.gscore + 1
-            if tentative_gscore < neighbour.gscore:
+            if not(neighbour.gscore) or tentative_gscore < neighbour.gscore:
                 neighbour.came_from = current_node
+                neighbour.came_from_move = move
+                neighbour.move_stack = current_node.move_stack + [move]
                 neighbour.gscore = tentative_gscore
                 neighbour.fscore = tentative_gscore + neighbour.get_heuristic()
                 if neighbour not in frontier_nodes:
